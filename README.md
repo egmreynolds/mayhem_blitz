@@ -1,8 +1,8 @@
-# war_game
+### war_game
+##### Obviously needs a better name
 
-# Obviously needs a better name
-
-# Game overview: Dominion-like deck builder meets competitive card game meets random chance.
+## Game overview:
+#### Dominion-like deck builder meets competitive card game meets random chance.
 Deal damage and invest in your army through a series of battles to ultimately become the winner.
 
 How to play:
@@ -18,3 +18,8 @@ A new round begins. <Discard piles are shuffled into decks when decks are empty>
 Abilities are described in abilities_functions.py
 
 Feel free to add any ability ideas you have, even if you don't implement them.
+
+Upcoming changes of interest:
+Make a gui representation either ktinker, unity, unreal, I don't know.
+Set up server, either local or AWS, so we can play online against each other.
+Make it so opponent can't see your hand / cards played...
