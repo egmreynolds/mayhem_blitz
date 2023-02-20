@@ -1,0 +1,17 @@
+Deck management for now I'm thinking of not doing. Will just have a 'DECK' asset that sits side of arena.
+When game decides what card is being 'drawn' it will just send command like -> player2.drawPriest.position[position_in_hand]
+Then in unreal engine when given that command will spawn the Priest Card asset facing the player 2 camera and it will move out of the Deck asset 
+and infront of Player 2s camera.
+
+Thinking I might even be able to make a rule so the assets as they're created are given a rule so they can only be seen by a particular camera. Not a priority as long 
+as card is facing right direction.
+
+Thinking for hand management, will have like a dictionary for card positions in X,Y,Z coordinates ( for each player ).
+So when told position5 will move that card to position 5's coordinates.
+
+Will have similar position management for cards on the board.
+
+
+
+
+
