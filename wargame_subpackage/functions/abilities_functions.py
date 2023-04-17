@@ -18,7 +18,7 @@ Abilities:
     # Should powers activate before or after damage done?
 """
 
-from ..classes.Card import Card
+from classes.Card import Card
 
 
 def activate_ability(card, owner, opponent, supply):
@@ -52,6 +52,50 @@ def activate_ability(card, owner, opponent, supply):
         pass
     elif card.rank == "Skeleton":
         owner.add_to_additional_cards_in_play(card) # Need further help if the card is to stay for the rest of the game
+
+def activate_ability_v2(card, owner, opponent, supply):
+    """
+    V2 = returns text_output and action - strings for display to activate.
+    """
+    if card.rank in ["Curse", "King", "Goblin", "Warlord", "Soldier"]: # cards with no ability
+        return (f"{card.rank} lost,\n nothing happens...\n", "")
+    
+    print(f"Ability Activated: {card}")
+    # Each card has an ability
+    # Do I need if/else statements to find the ability that matches cardname? Not so bad for now, but with >20 abilities it would be.
+    if card.rank == "Guard":
+        #trash_card_from_hand(owner) -  actions needing choices are now done elsewhere
+        return (f"{owner.name} can\n trash a card\n from their hand.\n\n", "guard")  
+    elif card.rank == "Priest":
+        add_card_from_supply(opponent, supply, Card("Curse"))
+        return (f"A Curse\n was added to {opponent.name}'s\n discard pile.\n\n", "")
+    elif card.rank == "Baron":
+        inflict_damage(opponent, 1)
+        owner.change_money(1)
+        return (f"{opponent.name} took\n 1 damage.\n {owner.name} gained\n 1 coin.\n\n", "")
+    elif card.rank == "Handmaid":
+        heal(owner, 3)
+        return (f"{owner.name} healed\n 3 HP.\n\n", "")
+    elif card.rank == "Prince":
+        trash_card_from_play(owner, card)    
+        return (f"{owner.name}'s {card.rank}\n was trashed.\n\n", "")
+    elif card.rank == "Lich":
+        trash_card_from_play(owner, card)
+        #owner.select_from_supply(supply, card.value + 1) - actions needing choices are now done elsewhere
+        return (f"{owner.name} trashed\n their {card.rank} and\n selected a new card\n from supply.\n\n", "lich")
+    elif card.rank == "Slime":
+        opponent.change_number_of_cards_to_draw(-1)
+        return (f"{opponent.name} will\n draw 1 less card\n next round.\n\n", "")
+    elif card.rank == "Orc":
+        owner.change_number_of_cards_to_draw(1)
+        return (f"{owner.name} will\n draw 1 more card\n next round.\n\n", "")
+    elif card.rank == "Skeleton":
+        owner.add_to_additional_cards_in_play(card) # this is still done here as it's not a choice, display update will be required? 
+        return (f"{owner.name}'s {card.rank}\n will remain\n on the battlefield.\n\n", "")
+    elif card.rank == "Matyr":
+        owner.set_multiplier(2)
+        return (f"{owner.name}'s damage\n will be doubled\n this round.\n\n")
+
 
 def heal(player, heal = 3):
     player.change_health(heal)  

@@ -1,5 +1,5 @@
-from ..classes.Hand import Hand 
-from ..classes.Card import Card
+from classes.Hand import Hand 
+from classes.Card import Card
     
 def create_supply_hand(supply):
     """
@@ -10,7 +10,7 @@ def create_supply_hand(supply):
     return supply_hand
 
 def reset_supply(supply):
-      for rank in Card.ranks:
+      for rank in Card.ranks[:-1]:
             for i in range(5):
                 supply.add_cards(Card(rank))
     

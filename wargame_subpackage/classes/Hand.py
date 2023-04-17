@@ -10,6 +10,7 @@ class Hand:
     def play_card(self, card):
         if card in self.all_cards:
             self.all_cards.remove(card)
+            self.size -= 1
             return card
         else:
             print(f"{card} isn't in hand...")
@@ -24,6 +25,7 @@ class Hand:
         for card in cards:
             if card in self.all_cards:
                 self.all_cards.remove(card)
+                self.size -= 1
             else:
                 print(f"{card} isn't in hand...")        
     

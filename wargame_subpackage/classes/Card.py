@@ -1,6 +1,6 @@
 class Card:
-    ranks = ("Guard", "Priest", "Baron", "Handmaid", "Prince", "Curse", "King", "Goblin", "Lich", "Warlord", "Orc", "Slime", "Skeleton", "Soldier", "Captain")
-    values = {"Guard" : 1, "Priest" : 2, "Baron" : 3, "Handmaid" : 4, "Prince" : 5, "Curse" : 0, "King" : 6, "Goblin" : 1, "Lich" : 4, "Warlord" : 5, "Slime" : 2, "Orc" : 3, "Skeleton" : 1, "Soldier" : 2, "Captain" : 3}
+    ranks = ("Guard", "Priest", "Baron", "Handmaid", "Prince", "Curse", "King", "Goblin", "Lich", "Warlord", "Orc", "Slime", "Skeleton", "Soldier", "Captain", "Matyr", "SKIP")
+    values = {"Guard" : 1, "Priest" : 2, "Baron" : 3, "Handmaid" : 4, "Prince" : 5, "Curse" : 0, "King" : 6, "Goblin" : 1, "Lich" : 4, "Warlord" : 5, "Slime" : 2, "Orc" : 3, "Skeleton" : 1, "Soldier" : 2, "Captain" : 3, "Matyr" : 2, "SKIP" : -1}
     """
     Need to differentiate attack power from cost.
     """

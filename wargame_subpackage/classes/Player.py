@@ -1,8 +1,8 @@
 from .Card import Card
 from .Hand import Hand
 from .Deck import Deck
-from ..functions.response_functions import request_response
-from ..functions.supply_functions import create_supply_hand
+#from ..functions.response_functions import request_response
+#from ..functions.supply_functions import create_supply_hand
 
 class Player():
     max_health = 15
@@ -19,7 +19,11 @@ class Player():
         self.money = 0
         self.number_of_cards_to_draw = 5
         self.additional_cards_in_play = []
+        self.new_additional_cards = []
         self.damage = 0
+        self.action_text = ""
+        self.log_text = ""
+        self.multiplier = 1
         
     def discard_hand(self):
         # Move hand to discard pile, reset cards played etc.
@@ -28,11 +32,20 @@ class Player():
     def discard_cards_played(self):
         self.discard.add_cards(self.cards_played)
         self.cards_played = []
+
+    def set_action_text(self, text):
+        self.action_text = text
+
+    def set_log_text(self, text):
+        self.log_text = text
     
     def end_round_reset(self):
         self.handsize = 0
         self.playorder = []       
-        
+        self.multiplier = 1
+
+
+    """
     def get_play_order(self):
         print(f"{self.name}, this is your hand.")
         print(self.hand)
@@ -40,8 +53,9 @@ class Player():
         self.playorder = request_response(question, num = 3, upper_bound = len(self.hand.all_cards) - 1, blank_ok = False)
         self.cards_played = [self.hand.all_cards[i] for i in self.playorder]
         self.hand.remove_cards(self.cards_played)
-        self.add_extras()
-   
+        #self.add_extras()
+    """
+
     def get_cards_to_trash(self, num = 1):
         self.trash_card()
         
@@ -49,18 +63,32 @@ class Player():
         print(", ".join([f"{card}" for card in self.cards_played]))
 
     def add_to_additional_cards_in_play(self, card):
-        self.additional_cards_in_play.append(card)
+        self.new_additional_cards.append(card)
+    # reset such that additional_cards_in_play does not reset ever.
+    #def add_extras(self):
+    #    self.cards_played.extend(self.additional_cards_in_play)
+    #    self.additional_cards_in_play = []
+    def add_new_additional_cards(self):
+        self.additional_cards_in_play.extend(self.new_additional_cards)
+        for card in self.new_additional_cards:
+            self.cards_played.remove(card)
 
-    def add_extras(self):
-        self.cards_played.extend(self.additional_cards_in_play)
-        self.additional_cards_in_play = []
+        self.new_additional_cards = []
 
     def get_damage(self):
         for card in self.cards_played:
             self.damage += card.value
         
+        self.damage = self.damage * self.multiplier
+
+        for card in self.additional_cards_in_play:
+            self.damage += card.value
+        
     def change_money(self, amount):
         self.money += amount
+
+    def set_multiplier(self, value):
+        self.multiplier = value    
 
     def change_number_of_cards_to_draw(self, amount):
         self.number_of_cards_to_draw += amount
@@ -116,7 +144,10 @@ class Player():
 
         print(f"{self.name} drew {cards_drawn} cards.")  
         self.number_of_cards_to_draw = 5  
+        self.set_log_text(f"You drew {self.handsize} cards.")
+        self.set_action_text(f"Select the 3 cards you would like to play.\n(Order matters).")
         
+"""
     def trash_card(self):
         # if hand is empty : nothing to trash
         # else: question = "Which card would you like to trash? " Upper - handsize, num = 1, blankok = true.
@@ -134,8 +165,8 @@ class Player():
             trash_card = self.hand.all_cards[choice[0]]
             print(f"{self.name} chose to trash a {trash_card}")
             self.hand.remove_cards([trash_card])           
-
-        
+"""
+"""       
     def purchase_phase(self, supply):
         self.print_money_status()
         supply.display_supply()
@@ -164,6 +195,9 @@ class Player():
         # add card, remove from supply
         # What if money didn't reset
         #self.money = 0
+
+"""
+"""       
     def select_from_supply(self, supply, value):
         print(f"Select a card up to value: {value}")
         supply.display_supply()
@@ -181,3 +215,5 @@ class Player():
             else:
                 print("You cannot afford this card, please choose another.")
                 print(f"You have ${value}.")
+
+"""
