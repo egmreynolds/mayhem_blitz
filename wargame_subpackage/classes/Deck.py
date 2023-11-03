@@ -24,6 +24,10 @@ class Deck:
     
     def is_empty(self):
         return self.all_cards == []    
+
+    def get_deck_size(self):
+        return len(self.all_cards)
+
     
     def display_supply(self):
         """
