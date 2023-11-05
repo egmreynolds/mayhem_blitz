@@ -13,6 +13,9 @@ class Network:
     def getP(self):
         return self.p
 
+    def getA(self):
+        return self.addr
+
     def connect(self):
         try:
             self.client.connect(self.addr)

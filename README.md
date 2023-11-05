@@ -7,6 +7,7 @@ Deal damage and invest in your army through a series of battles to ultimately be
 
 # TODO
 
+- use python3.9 -> python3.11
 - install requirements
 - config env vars (server and client)
 -
