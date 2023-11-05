@@ -298,5 +298,4 @@ def menu_screen():
 
 
 
-# menu_screen()
-main()
+menu_screen()

@@ -1,49 +1,36 @@
+import asyncio
+
+import websockets
 import socket
 from _thread import *
 from game import Game
 import pickle
+import threading
 
-# TODO: use env vars instead of hardcoding (server and port)
-# server = "127.0.0.1"
-server = "127.0.0.1"
-port = 5555
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    s.bind((server, port))
-except socket.error as e:
-    str(e)
-
-s.listen(10)
-print("Waiting for a connection, Server Started")
-
-connected = set()
 games = {}
 idCount = 0
 
-def threaded_client(conn, p, gameId):
+async def threaded_client(conn, p, gameId):
     print("Threaded client reached: ", p)
     print(gameId)
     print(games[gameId])
     global idCount
     try:
-        conn.send(pickle.dumps(p))
+      await conn.send(pickle.dumps(p))
     except:
         print("Failed to player id")
         print(p)
     reply = ""
 
-
     while not(games[gameId].ready):
         print(f"Game not ready yet: {p}")
 
     print("------------ Game is ready! ---------")
-    conn.sendall(pickle.dumps(games[gameId]))
+    await conn.send(pickle.dumps(games[gameId]))
 
     while True:
         try:
-            data = pickle.loads(conn.recv(2048))
+            data = pickle.loads(await conn.recv())
             print(data)
             print("passed start of try loop")
             if gameId in games: # Check game still exists
@@ -81,7 +68,7 @@ def threaded_client(conn, p, gameId):
                     reply = pickle.dumps(game)
                     print(f"reply occuring for {p}")
                     print # why does it never reply to 0
-                    conn.sendall(reply)
+                    await conn.send(reply)
                     print(f"Game ID: {gameId}")
                     print(f"Games: {games}")
             else:
@@ -101,18 +88,26 @@ def threaded_client(conn, p, gameId):
     except:
         pass
     idCount -= 1
-    conn.close()
+    await conn.close()
+
+# create handler for each connection
+
+async def handler(websocket, path):
+
+    idCount = int(await websocket.recv())
+
+    print(f"Data recieved: {idCount}")
+
+    await websocket.send("asdasdasd")
+    await websocket.send("asdasdasd")
+    await websocket.send("asdasdasd")
+    await websocket.send("asdasdasd")
 
 
-
-
-while True:
-    conn, addr = s.accept()
-    print("Connected to:", addr)
-
-    idCount += 1
     p = 0
     gameId = (idCount - 1)//2
+
+    print(f"Game ID: {gameId}")
     if idCount % 2 == 1: # new game required
         games[gameId] = Game(gameId)
         print("Creating a new game...")
@@ -120,4 +115,16 @@ while True:
         games[gameId].ready = True
         p = 1
 
-    start_new_thread(threaded_client, (conn, p, gameId)) # Start new game at each new connection
+    player = await threaded_client(websocket, p, gameId)
+    t = threading.Thread(asyncio.run_until_complete(asyncio.wait(player)))
+    t.start() # Start new game at each new connection
+
+
+
+start_server = websockets.serve(handler, "localhost", 8000)
+
+
+
+asyncio.get_event_loop().run_until_complete(start_server)
+
+asyncio.get_event_loop().run_forever()
