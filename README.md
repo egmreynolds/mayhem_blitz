@@ -13,9 +13,26 @@ Deal damage and invest in your army through a series of battles to ultimately be
 - install requirements (pip install -r requirements.txt)
 - config env vars (server and client)
 
-
 # TODO
 - implement logic for ending threads (server and client)
+- implement end of game logic
+
+# Desireable Features - Functionality:
+- login screen
+- search for game queue
+- Avoid ping_timeout (currently set to 120 seconds...)
+
+# Desireable Features - Gameplay Logic
+- Add cost variable for cards
+- Lich ability doesn't work
+- New Cards  
+- Log game state and/or game outcome in database
+
+# Desireable Features - Game Display
+- Add description to cards
+- Add images to cards
+- Avoid gamelog overwrite, convert to scrollable game-log.
+- Add thorough game rules section
 
 How to play:
 Start with set of generic small deck of cards.
