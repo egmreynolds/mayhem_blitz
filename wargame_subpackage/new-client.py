@@ -31,7 +31,8 @@ async def receive_moves(game, websocket):
     except Exception as e:
         print("Error in Receive Moves")
         print(e)
-    return msg
+    finally:
+        return msg
     
 
 async def send_moves(msg, websocket):
@@ -54,7 +55,7 @@ async def new_main():
     clock = pygame.time.Clock()
     #n = Network()
     #async with websockets.connect('ws://localhost:8000') as websocket:
-    websocket = await websockets.connect('ws://localhost:8000')
+    websocket = await websockets.connect('ws://<insert_AWS_ip>:8080')
     event = {"type" : "init", "message" : "hello"}
     await websocket.send(pickle.dumps(event))
     print("Sent TEST Event")
@@ -87,8 +88,8 @@ async def new_main():
             
     print("about to receive game object first")   
     #await websocket.send("test123") 
-    #testx =  await websocket.recv()   
-    #game = pickle.loads(testx) 
+    #testx =  await websocket.recv()
+    #game = pickle.loads(testx)
     print("received")
     print(game)   
     redrawWindow(win, game, player_idx, "41", reset = True)
