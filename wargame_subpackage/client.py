@@ -294,8 +294,8 @@ def menu_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 run = False
 
-    main()
+    #main()
 
 
 
-menu_screen()
+#menu_screen()
