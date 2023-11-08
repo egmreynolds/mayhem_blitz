@@ -31,7 +31,7 @@ supply_width, supply_height = (620, 380 + hand_height + sep)
 battlezone_x, battlezone_y = ((display_width - battlezone_width) / 2, 20)
 opponent_battlezone_x, opponent_battlezone_y = (battlezone_x + sep, battlezone_y + sep)
 player_battlezone_x, player_battlezone_y = (opponent_battlezone_x, opponent_battlezone_y + player_battlezone_height + sep)
-opponent_hp_x, opponent_hp_y = (battlezone_x + battlezone_width + sep, opponent_battlezone_y) 
+opponent_hp_x, opponent_hp_y = (battlezone_x + battlezone_width + sep, opponent_battlezone_y)
 opponent_money_x, opponent_money_y = (opponent_hp_x + stat_width + sep, opponent_hp_y)
 player_hp_x, player_hp_y = (opponent_hp_x, player_battlezone_y + player_battlezone_height - stat_height)
 player_money_x, player_money_y = (player_hp_x + stat_width + sep, player_hp_y)
@@ -104,7 +104,7 @@ def request_lich_reaction(game, player_idx):
 
 def select_from_supply(game, player_idx, max_money):
     """
-    Take input from user when selecting from supply.    
+    Take input from user when selecting from supply.
     """
     clickable_items = make_supply_display(game, "clickable")
     selected_card = ""
@@ -130,7 +130,7 @@ def select_from_supply(game, player_idx, max_money):
                             break
                         else:
                             pass
-    
+
     return selected_card
 
 def select_cards_to_play(game, player_idx, clickable_objects):
@@ -157,9 +157,12 @@ def select_cards_to_play(game, player_idx, clickable_objects):
 
 
 def main():
+    print("Starting main")
     run = True
     clock = pygame.time.Clock()
     n = Network()
+
+    print(n.getP())
     player_idx = int(n.getP())
     print("You are player: ", player_idx)
 
@@ -234,7 +237,7 @@ def main():
                     #redrawWindow(win, game, player_idx, f"2{game.part}")
                     card_rank = request_reaction_response(win, game, player_idx, game.reaction_str[player_idx])
                     msg = [player_idx, "ready", card_rank]
-                else:                    
+                else:
                     pass
 
 
@@ -256,7 +259,7 @@ def main():
                 pygame.time.delay(1000)
                 #selected_card = select_from_supply(game, player_idx, game.players[player_idx].money)
                 msg = [player_idx, "ready"]#, selected_card]
-                redrawWindow(win, game, player_idx, "41", reset = True)    
+                redrawWindow(win, game, player_idx, "41", reset = True)
                 pygame.time.delay(1000)
 
             elif game.phase == 4 and game.part == 1:
@@ -274,7 +277,7 @@ def main():
 def menu_screen():
     run = True
     clock = pygame.time.Clock()
-    
+
     while run:
         clock.tick(60)
         win.fill((128, 128, 128))
@@ -291,8 +294,8 @@ def menu_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 run = False
 
-    main()
+    #main()
 
 
 
-menu_screen()
+#menu_screen()

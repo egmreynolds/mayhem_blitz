@@ -28,6 +28,7 @@ class Game:
         self.player_action_idx = 0 # Which player needs to take the action.
         self.log_text = ["", ""]
         self.action_text = ["", ""]
+        #self.current_phase = "blank"
 
     def reset_game(self):
         reset_supply(self.supply)
@@ -35,6 +36,8 @@ class Game:
         self.players[1].setup_deck()
 
     def update_game(self, p, data):
+        print(f"Game updating for {p} at {self.phase} {self.part}")
+        print(f"Game data: {data}")
         if self.phase == 1 and self.part == 1:
             [self.players[p].cards_played.append(Card(x)) for x in data[2:]]
             self.players[p].hand.remove_cards(self.players[p].cards_played)
@@ -212,6 +215,8 @@ class Game:
         """
         This occurs once wrap up phase of previous round is complete, settting up the next round.
         """
+        self.round += 1
+        print(f"ROUND {self.round} BEGINS")
         self.phase = 1
         self.part = 1
     # also draw new hand

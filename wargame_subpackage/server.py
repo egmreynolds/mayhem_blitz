@@ -3,7 +3,9 @@ from _thread import *
 from game import Game
 import pickle
 
-server = ""
+# TODO: use env vars instead of hardcoding (server and port)
+# server = "127.0.0.1"
+server = "127.0.0.1"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,7 +33,7 @@ def threaded_client(conn, p, gameId):
         print("Failed to player id")
         print(p)
     reply = ""
-    
+
 
     while not(games[gameId].ready):
         print(f"Game not ready yet: {p}")
@@ -50,8 +52,8 @@ def threaded_client(conn, p, gameId):
                 print(f'{game.phase} : {game.part} : {game.subpart}')
                 if game.check_players_health() == "game_over":
                     print("GAME OVER!")
-                    game.set_game_over()                    
-                    #game.end_game()                   
+                    game.set_game_over()
+                    #game.end_game()
                     continue
                 if not data:
                     break
@@ -63,7 +65,7 @@ def threaded_client(conn, p, gameId):
                     # Then client will take game object and redraw diplay or ask for input.
                     if data[1] == "reset":
                         game.reset_game()
-                    elif data[1] == "ready":                        
+                    elif data[1] == "ready":
                         if data[1] == "ready" and f"{game.phase}{game.part}" in ["11", "21", "22", "23", "31"] and not(game.players_ready[data[0]]):
                             game.update_game(data[0], data)
                         game.set_ready(data[0]) # set that player as ready
@@ -77,8 +79,8 @@ def threaded_client(conn, p, gameId):
                         #print("played game")
 
                     reply = pickle.dumps(game)
-                    print(f"reply occuring for {p}")     
-                    print # why does it never reply to 0 
+                    print(f"reply occuring for {p}")
+                    print # why does it never reply to 0
                     conn.sendall(reply)
                     print(f"Game ID: {gameId}")
                     print(f"Games: {games}")
@@ -91,7 +93,7 @@ def threaded_client(conn, p, gameId):
             print("It's breaking")
             print(e)
             break
-    
+
     print("Lost Connection")
     try:
         del games[gameId]
@@ -100,7 +102,7 @@ def threaded_client(conn, p, gameId):
         pass
     idCount -= 1
     conn.close()
-    
+
 
 
 

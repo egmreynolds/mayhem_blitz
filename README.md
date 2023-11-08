@@ -5,6 +5,18 @@
 #### Dominion-like deck builder meets competitive card game meets random chance.
 Deal damage and invest in your army through a series of battles to ultimately become the winner.
 
+# Installation
+
+- use python3.9 -> python3.11
+- create virtual env (python3 -m venv env)
+- activate env (source env/bin/activate)
+- install requirements (pip install -r requirements.txt)
+- config env vars (server and client)
+
+
+# TODO
+- implement logic for ending threads (server and client)
+
 How to play:
 Start with set of generic small deck of cards.
 Each player draws a hand of 5 cards from which they will select 3 to play face down in front of them in an order of your choice.
