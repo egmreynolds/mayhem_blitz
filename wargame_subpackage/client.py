@@ -102,6 +102,32 @@ def redraw_lich_reaction(win, game, player_idx):
 def request_lich_reaction(game, player_idx):
     return select_from_supply(game, player_idx, 5)
 
+def request_gameover_response(win, game, player_idx):
+    """
+    Draw 'return to main menu' text box, and wait for the player to click it. Then return.
+    """
+    # Redraw 'Return to Main Menu' Over Hand Position
+    redrawWindow(win, game, player_idx, "51")
+    # Make clickable object
+    clickables = [ClickableDisplayItem("RETURN TO MAIN MENU", hand_cards_x, hand_cards_y, card_width * 5, card_height, (255, 255, 255), Card("SKIP"))]
+    break_loop = False
+    while not(break_loop):
+        for event in pygame.event.get():
+            if break_loop: break
+            if event.type == pygame.QUIT:
+                break_loop = True
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                for obj in clickables:  # Cycle through cards, if it's clicked and hasn't been added yet, add to cards_played
+                    if obj.click(pos):
+                        print(obj.text)
+                        break_loop = True
+                        break
+    
+    return "game_over"
+
+
 def select_from_supply(game, player_idx, max_money):
     """
     Take input from user when selecting from supply.
