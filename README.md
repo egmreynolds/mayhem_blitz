@@ -15,7 +15,6 @@ Deal damage and invest in your army through a series of battles to ultimately be
 
 # TODO
 - implement logic for ending threads (server and client)
-- implement end of game logic
 
 # Desireable Features - Functionality:
 - login screen
