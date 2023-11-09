@@ -79,6 +79,12 @@ def redrawWindow(win, game, player_idx, phase, reset = False, with_skip = False)
         redraw_decks(win, game, player_idx)
         redraw_stats(win, game, player_idx)
         redraw_textboxes(win, game, player_idx)
+    
+    elif phase == "51":
+        redraw_battlefield(win, game, player_idx)
+        redraw_gameover(win, game, player_idx)
+        redraw_stats(win, game, player_idx)
+        redraw_textboxes(win, game, player_idx)
 
 
 def redraw_stats(win, game, player_idx):
@@ -112,13 +118,22 @@ def redraw_hand(win, game, player_idx, with_skip = False):
         item.draw(win)
 
     pygame.display.update()
-
+    
+def redraw_gameover(win, game, player_idx):
+    """
+    Redraw 'RETURN TO MAIN MENU' box in Hand position
+    """
+    hand_background = UpdatedDisplayItem("", hand_x, hand_y, hand_width, hand_height, (100, 100, 100))
+    item = UpdatedDisplayItem("RETURN TO MAIN MENU", hand_cards_x + (card_width + sep), hand_cards_y, card_width * 4, card_height, (255, 255, 255))
+    item.draw(win)
+    pygame.display.update()
+    
 def redraw_textboxes(win, game, player_idx):
     """
-    Redraw log and action text boxes. # Add p1_log, p2_log, p1_action_text, p2_action_text to game.
+    Redraw log and action text boxes. # Add p1_log, p2_log, p1_prompt, p2_prompt to game.
     """
     log_display = UpdatedDisplayItem(game.players[player_idx].log_text, log_x, log_y, log_width, log_height, (200, 200, 200), pos = True)
-    action_display = UpdatedDisplayItem(game.players[player_idx].action_text, action_x, action_y, action_width, action_height, (255, 255, 255))
+    action_display = UpdatedDisplayItem(game.players[player_idx].prompt, action_x, action_y, action_width, action_height, (255, 255, 255))
     items = [log_display, action_display]
     for item in items:
         item.draw(win)

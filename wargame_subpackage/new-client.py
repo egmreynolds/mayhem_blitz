@@ -2,7 +2,7 @@ import asyncio
 import websockets
 import pygame
 import pickle
-from client import redrawWindow, make_card_display, request_reaction_response, select_from_supply, select_cards_to_play
+from client import redrawWindow, make_card_display, request_reaction_response, select_from_supply, select_cards_to_play, request_gameover_response
 import time
 
 display_width, display_height = (800, 800)
@@ -32,8 +32,7 @@ async def receive_moves(game, websocket):
         print("Error in Receive Moves")
         print(e)
     finally:
-        return msg
-    
+        return msg    
 
 async def send_moves(msg, websocket):
     try:
@@ -41,10 +40,8 @@ async def send_moves(msg, websocket):
         event = {
             "type": "play",
             "data" : msg
-        }           
-        
-        await websocket.send(pickle.dumps(event))
-        
+        }                   
+        await websocket.send(pickle.dumps(event))        
     except:
         print("Error in Sending Moves")
 
@@ -55,7 +52,8 @@ async def new_main():
     clock = pygame.time.Clock()
     #n = Network()
     #async with websockets.connect('ws://localhost:8000') as websocket:
-    websocket = await websockets.connect('ws://<insert_AWS_ip>:8080')
+    #websocket = await websockets.connect('ws://<insert_AWS_ip>:8080')
+    websocket = await websockets.connect('ws://localhost:8080')
     event = {"type" : "init", "message" : "hello"}
     await websocket.send(pickle.dumps(event))
     print("Sent TEST Event")
@@ -97,9 +95,7 @@ async def new_main():
     msg = [player_idx, "ready"]
     #current_phase = "blank"
     
-    # try using while run loop, and receive moves and send moves functions
-    
-    
+    # try using while run loop, and receive moves and send moves functions 
     #async for message in websocket:
     while run: 
         print("test")
@@ -117,8 +113,7 @@ async def new_main():
             run = False
             print("Couldn't get game, sorry.")
             print(e)
-            #break
-        
+            #break        
         #msg = update_game(win, game, player_idx)
                         # Listen for any events (card clicks)
         for event in pygame.event.get():
@@ -180,7 +175,6 @@ def update_game_client(game, player_idx):
             else:
                 pass
 
-
         elif game.phase == 2 and game.part == 4:
             print("Phase 24")
             redrawWindow(win, game, player_idx, "24")
@@ -207,6 +201,18 @@ def update_game_client(game, player_idx):
             redrawWindow(win, game, player_idx, "41") ## Whole window
             pygame.time.delay(1000)
             msg = [player_idx, "ready"]
+            
+        elif game.phase == 5 and game.part == 1:
+            print("Phase 51 - GameOver")
+            redrawWindow(win, game, player_idx, "41")
+            pygame.time.delay(1000)
+            print("Requesting game over response....")
+            if request_gameover_response(win, game, player_idx) == "game_over":
+                msg = [player_idx, "reset"] # Change to 'main menu' eventually
+            else:
+                print("**** game over response fail **** ")
+                
+            print(f"game over response: {msg}")
             
     return msg
 

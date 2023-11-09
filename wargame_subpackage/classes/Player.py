@@ -21,7 +21,7 @@ class Player():
         self.additional_cards_in_play = []
         self.new_additional_cards = []
         self.damage = 0
-        self.action_text = ""
+        self.prompt = ""
         self.log_text = ""
         self.multiplier = 1
         
@@ -33,8 +33,8 @@ class Player():
         self.discard.add_cards(self.cards_played)
         self.cards_played = []
 
-    def set_action_text(self, text):
-        self.action_text = text
+    def set_prompt(self, text):
+        self.prompt = text
 
     def set_log_text(self, text):
         self.log_text = text
@@ -145,7 +145,7 @@ class Player():
         print(f"{self.name} drew {cards_drawn} cards.")  
         self.number_of_cards_to_draw = 5  
         self.set_log_text(f"You drew {self.handsize} cards.")
-        self.set_action_text(f"Select the 3 cards you would like to play.\n(Order matters).")
+        self.set_prompt(f"Select the 3 cards you would like to play.\n(Order matters).")
         
 """
     def trash_card(self):

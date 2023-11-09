@@ -16,7 +16,7 @@ class Game:
         self.round = 0
         self.reset_game()
         self.ready = False
-        self.phase = 0 # Game has 4 phases: 1 - Strategy, 2 - Battle, 3 - Buy, 4 - Wrap-up
+        self.phase = 0 # Game has 4 phases: 1 - Strategy, 2 - Battle, 3 - Buy, 4 - Wrap-up [5 - game over]
         self.part = 1 # strategy has 2 parts: 1 - Show hand, 2 - Show cards played before battle.
         # Battle has 4 parts: 1 - battle 1, 2 - battle 2, 3 - battle 3, 4 - overall resolution
         self.subpart = 1 # Just for battle phase (1 - run battle, 2 - reaction activated)
@@ -27,8 +27,21 @@ class Game:
         self.action = ""
         self.player_action_idx = 0 # Which player needs to take the action.
         self.log_text = ["", ""]
-        self.action_text = ["", ""]
+        self.prompt = ["", ""]
+        self.game_state = "in_play" #Game states: in_play, game_over; add more as is necessary
+        self.game_reset = [False, False]
         #self.current_phase = "blank"
+
+    def set_reset(self, p):
+        """
+        Assign game_reset[player] = True - Indicating This player is ready to 'return to main menu' or 'reset' the game
+        """
+        self.game_reset[p] = True
+        
+    def check_reset_state(self):
+        """Returns True if both players have requested a reset
+        """
+        return self.game_reset[0] and self.game_reset[1]
 
     def reset_game(self):
         reset_supply(self.supply)
@@ -42,25 +55,25 @@ class Game:
             [self.players[p].cards_played.append(Card(x)) for x in data[2:]]
             self.players[p].hand.remove_cards(self.players[p].cards_played)
             self.players[p].set_log_text("\n".join([f"{card.rank}_{card.value}" for card in self.players[p].cards_played]))
-            self.players[p].set_action_text("")
+            self.players[p].set_prompt("")
 
         if self.phase == 2 and self.reaction_activated[p]: # If the player is the one who had a reaction activated, process it.
             self.process_reaction(p, data)
-            self.players[0].set_action_text("")
-            self.players[1].set_action_text("")
+            self.players[0].set_prompt("")
+            self.players[1].set_prompt("")
             # process reaction...
 
         elif self.phase == 3 and self.part == 1:
             if data[2] == "SKIP":
                 self.players[p].set_log_text("No card was chosen\n from supply\n")
-                self.players[p].set_action_text("")
+                self.players[p].set_prompt("")
             else:
                 bought_card = Card(data[2])
                 self.players[p].change_money(-1 * bought_card.value)
                 self.players[p].discard.add_cards(bought_card)
                 self.supply.remove_card(bought_card)
                 self.players[p].set_log_text(f"{self.players[p].name} gained\n  a {bought_card.rank}\n from the supply.\n")
-                self.players[p].set_action_text("")
+                self.players[p].set_prompt("")
 
         print(f"Game updated for player: {p}")
 
@@ -81,7 +94,7 @@ class Game:
                         #[self.players[p].cards_played.append(Card(x)) for x in data[1:3]]
                         #self.players[p].hand.remove_cards(self.players[p].cards_played)
                         #self.players[p].set_log_text("\n".join([f"{card.rank}_{card.value}" for card in self.players[p].cards_played]))
-                        #self.players[p].set_action_text("")
+                        #self.players[p].set_prompt("")
                                     
                 elif self.phase == 2:
                     if self.part <= 3:
@@ -107,21 +120,21 @@ class Game:
                 elif self.phase == 3:
                     
                     if self.part == 1:
-                        self.players[0].set_action_text(f"You have {self.players[0].money} coins.\n Select a card to Buy up to that value.\n")
-                        self.players[1].set_action_text(f"You have {self.players[1].money} coins.\n Select a card to Buy up to that value.\n")
+                        self.players[0].set_prompt(f"You have {self.players[0].money} coins.\n Select a card to Buy up to that value.\n")
+                        self.players[1].set_prompt(f"You have {self.players[1].money} coins.\n Select a card to Buy up to that value.\n")
                     # happens on client : money_spent = select_from_supply(game, player_idx, game.players[player_idx].money)
                     """
                     elif self.part == 2:                    
                         if data[1] == "SKIP":
                             self.players[p].set_log_text("No card was chosen\n from supply\n")
-                            self.players[p].set_action_text("")
+                            self.players[p].set_prompt("")
                         else:
                             bought_card = Card(data[1])
                             self.players[p].change_money(-1 * bought_card.value)
                             self.players[p].discard.add_cards(bought_card)
                             self.supply.remove_card(bought_card)
                             self.players[p].set_log_text(f"{self.players[p].name} gained a {bought_card.rank}\n from the supply.\n")
-                            self.players[p].set_action_text("")
+                            self.players[p].set_prompt("")
                     """
                 elif self.phase == 4:
                     self.end_round()
@@ -152,8 +165,8 @@ class Game:
             pass
 
     def activate_guard(self, p):
-        self.players[p].set_action_text("Select a card in hand to trash.\n")
-        self.players[(p-1) * -1].set_action_text("Waiting for other player to react...")
+        self.players[p].set_prompt("Select a card in hand to trash.\n")
+        self.players[(p-1) * -1].set_prompt("Waiting for other player to react...")
 
     def process_guard(self, p, data):
         try:
@@ -171,8 +184,8 @@ class Game:
             print("process_guard problem occured", data)
 
     def activate_lich(self, p):
-        self.players[p].set_action_text("Select a card from supply up to value 5.\n")
-        self.players[(p-1) * -1].set_action_text("Waiting for other player to react...")
+        self.players[p].set_prompt("Select a card from supply up to value 5.\n")
+        self.players[(p-1) * -1].set_prompt("Waiting for other player to react...")
 
     def process_lich(self, p, data):
         try:
@@ -194,11 +207,49 @@ class Game:
 
     def set_ready(self, p):
         self.players_ready[p] = True
+        
+    def set_game_state(self, game_state):
+        self.game_state = game_state
 
     def set_game_over(self):
+        """
+        Change Log to 'GAME OVER'.     
+        """
         self.players[0].set_log_text("GAME OVER")
         self.players[1].set_log_text("GAME OVER")
-
+        self.phase = 5
+        self.part = 1
+        
+    def announce_winner(self):
+        """
+        Change Prompt to indicate whether player has won or lost.   
+        """
+        winner = self.get_winner()
+        if winner == 0:
+            self.players[0].set_prompt("Winner! You have won!")
+            self.players[1].set_prompt("Defeat! You have lost!")
+        elif winner == 1:
+            self.players[1].set_prompt("Winner! You have won!")
+            self.players[0].set_prompt("Defeat! You have lost!")
+        else:
+            self.players[0].set_prompt("Draw! Game has ended in a tie...")
+            self.players[1].set_prompt("Draw! Game has ended in a tie...")
+            
+        
+    def get_winner(self):
+        """
+        Return 0 or 1 or 9 as to which player has dealt the final blow. If 9 - it's a draw, both players are dead.
+        """
+        winner = -1
+        if self.players[0].check_health() == "game_over" and self.players[1].check_health() == "game_over":
+            winner = 9
+        elif self.players[0].check_health() == "game_over":
+            winner = 1
+        elif self.players[1].check_health() == "game_over":
+            winner = 0
+        else:
+            print("************** Game Over without Winner *************")
+        return winner
 
     def end_round(self):
         """
@@ -224,8 +275,8 @@ class Game:
     def set_log_text(self, player_idx, text):
         self.players[player_idx].set_log_text(text)
 
-    def set_action_text(self, player_idx, text):
-        self.players[player_idx].set_action_text(text)
+    def set_prompt(self, player_idx, text):
+        self.players[player_idx].set_prompt(text)
 
     def run_battle(self, battle_number):
         """

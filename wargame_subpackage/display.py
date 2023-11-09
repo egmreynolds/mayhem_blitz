@@ -63,3 +63,4 @@ class ClickableDisplayItem(DisplayItem):
 
     def was_clicked(self):
         self.clicked = True
+        
