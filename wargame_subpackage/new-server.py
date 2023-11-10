@@ -91,17 +91,31 @@ async def start(websocket):
     gameId = 0
     game = Game(gameId)
     connected = {websocket}
-    EVENTS["init"] == "Game Started"
+    #EVENTS["init"] = "Game Started"
     EVENTS["gameId"] = gameId
 
     join_key = 0
     JOIN[join_key] = game, connected
+    
+    event = {
+            "type" : "wait",
+            "player" : 0,
+            "game" : game
+        }
+       
+    while EVENTS["init"] != "No game available.":
+        await websocket.send(pickle.dumps(event))
+        print(EVENTS["init"])
+        print("waiting for game")
+        event = await websocket.recv()
+        event = pickle.loads(event)  
+        time.sleep(0.5)
 
     try:
         # Send the secret access token to the browser of the first player,
         # where it'll be used for building a "join" link.
         event = {
-            "type": "init",
+            "type": "play",
             "join": join_key,
             "player" : 0,
             "game": game
@@ -146,13 +160,14 @@ async def join(websocket, join_key):
         return
    # Register to receive moves from this game.
     connected.add(websocket)
+    time.sleep(0.5)
     try:
         # Send the first move, in case the first player already played it.
         # await replay(websocket, game)
         # Receive and process moves from the second player.
         
         event = {
-            "type": "init",
+            "type": "play",
             "join": join_key,
             "player" : 1,
             "game": game
@@ -171,13 +186,41 @@ async def handler(websocket):
     assert event["type"] == "init"
     print(f"EVENTS: {EVENTS['init']}")
     
-
-    if EVENTS["init"] == "Game Started":
-        EVENTS["init"] == "No game available."
-        await join(websocket, EVENTS["gameId"])
+    event = {
+        "type" : "login",
+    }
+    await websocket.send(pickle.dumps(event))
+    
+    # Wait for login credentials
+    event = await websocket.recv()
+    event = pickle.loads(event)
+    
+    assert event["type"] == "login"
+    if event["username"] == "guest":
+        if event["password"] == "guest123":
+            event = {
+                "type" : "lobby"                
+            }
+            await websocket.send(pickle.dumps(event))
+        else:
+            print("Password failed")
+            return
     else:
-        EVENTS["init"] = "Game Started"
-        await start(websocket)
+        print("Username failed")
+        return
+    
+    # Wait for game request - if it already exists -> join(), if it doesn't start()
+    event = await websocket.recv()
+    event = pickle.loads(event)
+    
+    assert event["type"] == "request_game"
+    if event["type"] == "request_game":    
+        if EVENTS["init"] == "Game Started":
+            EVENTS["init"] = "No game available."
+            await join(websocket, EVENTS["gameId"])
+        else:
+            EVENTS["init"] = "Game Started"
+            await start(websocket)
 
    # if "join" in event:
     #    join(websocket, event["join"])

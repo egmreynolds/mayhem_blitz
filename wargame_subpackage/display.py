@@ -64,3 +64,41 @@ class ClickableDisplayItem(DisplayItem):
     def was_clicked(self):
         self.clicked = True
         
+# From stackoverflow:        
+class InputBox:
+
+    def __init__(self, x, y, w, h, text=''):
+        self.x = x
+        self.y = y
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = (0,0,0)
+        self.text = text
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = True
+            else:
+                self.active = False
+            
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+                    self.text = ''
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                    
+    def draw(self, win):
+        font = pygame.font.SysFont("arial", 20)
+        text = font.render(self.text, 1, (0, 0, 0))
+        # Blit the text.
+        win.blit(text, (self.x, self.y))
+        # Blit the rect.
+        pygame.draw.rect(win, self.color, self.rect, 2)
+

@@ -3,6 +3,7 @@ import websockets
 import pygame
 import pickle
 from client import redrawWindow, make_card_display, request_reaction_response, select_from_supply, select_cards_to_play, request_gameover_response
+from redraw_functions import redraw_mainmenu, redraw_loginscreen, redraw_lobbyscreen
 import time
 
 display_width, display_height = (800, 800)
@@ -24,6 +25,7 @@ async def receive_moves(game, websocket):
         print("Receiving Moves")
         event = await websocket.recv()
         event = pickle.loads(event)
+        print(f"Moves received: {event}")
         game = event["game"]
         player_idx = event["player"]
         print(f"Player ID : {player_idx}")
@@ -46,27 +48,27 @@ async def send_moves(msg, websocket):
         print("Error in Sending Moves")
 
 
-async def new_main():
-    print("Starting new main")
+async def new_main(player_idx, game, websocket):
+    print("Starting game main")
     run = True
     clock = pygame.time.Clock()
     #n = Network()
     #async with websockets.connect('ws://localhost:8000') as websocket:
     #websocket = await websockets.connect('ws://<insert_AWS_ip>:8080')
-    websocket = await websockets.connect('ws://localhost:8080')
-    event = {"type" : "init", "message" : "hello"}
-    await websocket.send(pickle.dumps(event))
-    print("Sent TEST Event")
-    event = await websocket.recv()
-    print("You are player: ", event)
-    print("You are player: ", pickle.loads(event))
-    game_data = pickle.loads(event)
-    game = game_data["game"]
-    player_idx = game_data["player"]
-    print("123")
+    #websocket = await websockets.connect('ws://localhost:8080')
+    #event = {"type" : "init", "message" : "hello"}
+    #await websocket.send(pickle.dumps(event))
+    #print("Sent TEST Event")
+    #event = await websocket.recv()
+    #print("You are player: ", event)
+    #print("You are player: ", pickle.loads(event))
+    #game_data = pickle.loads(event)
+    #game = game_data["game"]
+    #player_idx = game_data["player"]
+    #print("123")
     #async for message in websocket:
     #        print(message)
-
+    """
     waiting_for_game = False
     while waiting_for_game:
         print("now im waiting")
@@ -83,12 +85,13 @@ async def new_main():
                     print("We are ready to go!")
             except:
                 print("Not ready yet...")
-            
-    print("about to receive game object first")   
+          
+    """  
+    #print("about to receive game object first")   
     #await websocket.send("test123") 
     #testx =  await websocket.recv()
     #game = pickle.loads(testx)
-    print("received")
+    #print("received")
     print(game)   
     redrawWindow(win, game, player_idx, "41", reset = True)
     #n.send_to_server([player_idx, "ready"])
@@ -100,7 +103,7 @@ async def new_main():
     while run: 
         print("test")
         clock.tick(60)
-        time.sleep(1)
+        time.sleep(0.5)
         try:
             await send_moves(msg, websocket)
             msg = await receive_moves(game, websocket)
@@ -115,10 +118,12 @@ async def new_main():
             print(e)
             #break        
         #msg = update_game(win, game, player_idx)
-                        # Listen for any events (card clicks)
+                        # Listen for any events (card clicks)               
+        if msg[1] == "reset":
+            run  = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                pygame.quit()                
                         
         
 def update_game_client(game, player_idx):
@@ -217,5 +222,127 @@ def update_game_client(game, player_idx):
     return msg
 
 
+async def lobby(websocket):
+    """
+    Display Lobby Screen
+    Ask User to 'start game'
+    Wait for two players before game actually starts (send p1 'wait' in the mean time.)    
+    """
+    staying_in_lobby = True # There should be a way to exit other than the 'x' button...
+    while staying_in_lobby:
+        # redraw_lobbyscreen(win) - returns 'connect' # in the future there might be 'stats' or 'settings'
+        # send request to server.
+        redraw_lobbyscreen(win, wait = False)
+        # Wait for a click
+        run = True
+        clock = pygame.time.Clock()
+        while run: # Wait for User to 'CLICK' the connect button.
+            clock.tick(5) # keeps game down to 5 frames per second
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()       
+                    if 250 <= pos[0] <= 250 + 300 and 250 <= pos[1] <= 250 + 200:
+                        run = False
+                        break
 
-asyncio.get_event_loop().run_until_complete(new_main())
+        redraw_lobbyscreen(win, wait = True)
+        event = {
+            "type": "request_game",
+            "msg": "player wants to play"
+        }
+        await websocket.send(pickle.dumps(event))
+        
+        waiting_for_game = True
+        while waiting_for_game:
+            event = await websocket.recv()
+            event = pickle.loads(event)
+            print(f"Lobby Moves received: {event}")
+            
+            if event["type"] == "wait":
+                print("Still waiting for game...")
+                event = {
+                    "type" : "wait",
+                    "msg" : "player is still waiting"
+                }
+                await websocket.send(pickle.dumps(event))
+            elif event["type"] == "play":
+                waiting_for_game = False
+                player_idx = event["player"]
+                game = event["game"]
+                #start_game() if player 0
+                #join_game() if player 1
+                await new_main(player_idx, game, websocket)
+                #pass
+            else:
+                print("Unexpected response from server. Not wait or play in Lobby.")
+                print(event)
+                exit()
+                
+        print("Game is Over, time to go back to lobby")
+
+async def login():
+    """
+    Display Login Screen.
+    Request Username and Password
+    Send to Server
+    """
+    websocket = await websockets.connect('ws://localhost:8080')
+    event = {"type" : "init", "message" : "connect request"}
+    await websocket.send(pickle.dumps(event))
+    print("Sent Connection Request")
+    event = await websocket.recv() # Receive message from server
+    event = pickle.loads(event)
+    event = {'type' : 'login'}
+    #while True:
+    if event["type"] == "login":
+        username, password = redraw_loginscreen(win)
+        # send to server
+        event = {
+            "type" : "login",
+            "username" : username,
+            "password" : password,
+        }
+        await websocket.send(pickle.dumps(event))
+
+        event = await websocket.recv()
+        event = pickle.loads(event)
+
+        if event['type'] == 'lobby':
+            await lobby(websocket)
+        else:
+            print("Login Failed")
+            print(event)
+            exit()        
+        
+    else:
+        print("Connect Request Error: Server Failed to request login details.")
+        exit()   
+
+def menu_screen():
+    """
+    Display Main Menu Screen.
+    Request User to Connect -> Send Connect request to Server
+    """
+    run = True
+    clock = pygame.time.Clock()
+    while run: # Wait for User to 'CLICK' the connect button.
+        clock.tick(5) # keeps game down to 5 frames per second
+        redraw_mainmenu(win)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()        
+                if 250 <= pos[0] <= 250 + 300 and 250 <= pos[1] <= 250 + 200:
+                    run = False
+                    break
+    #login()
+    asyncio.get_event_loop().run_until_complete(login())
+
+        
+
+menu_screen()

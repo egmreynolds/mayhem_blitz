@@ -1,5 +1,5 @@
 import pygame
-from display import UpdatedDisplayItem, ClickableDisplayItem
+from display import UpdatedDisplayItem, ClickableDisplayItem, InputBox
 from classes.Card import Card # Remove, for test only
 
 display_width, display_height = (800, 800)
@@ -279,3 +279,85 @@ def make_supply_display(game, type):
     display_items.append(ClickableDisplayItem("SKIP", (supply_cards_x + (card_width + sep)*col), (supply_cards_y + (card_height + sep)*row), card_width, card_height, (0, 0, 255), Card("SKIP")))
 
     return display_items
+
+def redraw_mainmenu(win):
+    """
+    Draw main menu screen - First Window User sees in Client.
+    Simply Game Title and Connect Button.
+    """
+    win.fill((21, 139, 154))
+    font = pygame.font.SysFont("arial", 60)
+    text_title = font.render("Mayhem Blitz", 1, (154, 36, 21))    
+    win.blit(text_title, (250, 100))
+    item = UpdatedDisplayItem("", 250, 250, 300, 200, (154, 69, 21))
+    item.draw(win)
+    text_connect = font.render("Connect!", 1, (154, 36, 21)) 
+    win.blit(text_connect, (300, 300))
+    pygame.display.update()
+    
+def redraw_loginscreen(win):
+    """
+    Draw Username and Password boxes, display them and request input.
+    """      
+    username, password = ["", ""]
+    win.fill((21, 139, 154))
+    font = pygame.font.SysFont("arial", 60)
+    font_subtext = pygame.font.SysFont("arial", 30)
+    text_title = font.render("Mayhem Blitz", 1, (154, 36, 21))    
+    win.blit(text_title, (250, 100))
+    text_username = font_subtext.render("Username", 1, (255, 255, 255))
+    text_password = font_subtext.render("Password", 1, (255, 255, 255))
+    username_item = InputBox(250, 250, 300, 50, username)
+    password_item = InputBox(250, 350, 300, 50, password)
+    input_boxes = [username_item, password_item]
+    win.blit(text_username, (250,220))
+    #username_item.draw(win)
+    win.blit(text_password, (250,320))
+    enter_item = UpdatedDisplayItem("Enter", 350, 450, 100, 60, (154, 69, 21))
+    enter_item.draw(win)
+    # Create ENTER ClickableItem: display.
+    #password_item.draw(win)
+    pygame.display.update()
+    done = False
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+                pygame.quit()
+            for box in input_boxes:
+                box.handle_event(event)
+                
+            # if event hits ENTER: return username, password
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()        
+                if 350 <= pos[0] <= 350 + 100 and 450 <= pos[1] <= 450 + 60:
+                    done = True
+                    username = input_boxes[0].text
+                    password = input_boxes[1].text
+                    break
+
+        for box in input_boxes:
+            box.draw(win)
+                                    
+        pygame.display.update()    
+         
+    return (username, password)   
+
+def redraw_lobbyscreen(win, wait = False):
+    """
+    Draw Lobby - includes title, games played, players online
+    Include a button 'Start Game' which will add player to 'looking for game' or 'start game'
+    If wait == True: Add waiting for opponent... text, remove clickable button.
+    """     
+    win.fill((21, 139, 154))
+    font = pygame.font.SysFont("arial", 60)
+    text_title = font.render("Mayhem Blitz", 1, (154, 36, 21))    
+    win.blit(text_title, (250, 100))
+    if wait:
+        item = UpdatedDisplayItem("Waiting for opponent...", 250, 250, 300, 200, (154, 69, 21))
+        item.draw(win)
+    else:
+        item = UpdatedDisplayItem("Start Game", 250, 250, 300, 200, (154, 69, 21))
+        item.draw(win)
+
+    pygame.display.update()
