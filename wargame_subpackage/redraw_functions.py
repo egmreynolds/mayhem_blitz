@@ -267,9 +267,9 @@ def make_supply_display(game, type):
     col = 0
     for i in range(n_cards):
         if type == "unclickable":
-            display_items.append(UpdatedDisplayItem(f"{unique_cards[i].rank} \n{unique_cards[i].value} ", (supply_cards_x + (card_width + sep)*col), (supply_cards_y + (card_height + sep)*row), card_width, card_height, (0, 0, 255)))
+            display_items.append(UpdatedDisplayItem(f"{unique_cards[i].rank} \n{unique_cards[i].value} \nC:{unique_cards[i].cost}", (supply_cards_x + (card_width + sep)*col), (supply_cards_y + (card_height + sep)*row), card_width, card_height, (0, 0, 255)))
         else:
-            display_items.append(ClickableDisplayItem(f"{unique_cards[i].rank} \n{unique_cards[i].value} ", (supply_cards_x + (card_width + sep)*col), (supply_cards_y + (card_height + sep)*row), card_width, card_height, (0, 0, 255), unique_cards[i]))
+            display_items.append(ClickableDisplayItem(f"{unique_cards[i].rank} \n{unique_cards[i].value} \nC:{unique_cards[i].cost} ", (supply_cards_x + (card_width + sep)*col), (supply_cards_y + (card_height + sep)*row), card_width, card_height, (0, 0, 255), unique_cards[i]))
         
         col += 1
         if (i+1) % 6 == 0:

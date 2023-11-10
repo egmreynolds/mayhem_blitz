@@ -24,6 +24,7 @@ class Player():
         self.prompt = ""
         self.log_text = ""
         self.multiplier = 1
+        self.cards_to_trash = []
         
     def discard_hand(self):
         # Move hand to discard pile, reset cards played etc.
@@ -74,6 +75,22 @@ class Player():
             self.cards_played.remove(card)
 
         self.new_additional_cards = []
+        
+    def add_to_cards_to_trash(self, card):
+        """
+        Ability may cause a card to be trashed at the end of the round, this is the placeholder for these.
+        """
+        self.cards_to_trash.append(card)
+        
+    def trash_cards_to_trash(self):
+        """
+        End of Round / Resolve Battle: Trash cards that were flagged for trashing. This specifically trashes cards from the play area.
+        Note: This will not trash cards from additional_cards_in_play.
+        """
+        for card in self.cards_to_trash:
+            self.cards_played.remove(card)
+        
+        self.cards_to_trash = []
 
     def get_damage(self):
         for card in self.cards_played:

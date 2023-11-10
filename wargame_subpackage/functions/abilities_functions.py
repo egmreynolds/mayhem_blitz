@@ -13,6 +13,8 @@ Abilities:
     ###This card stays on the battlefield, adding it's strength to the next battle? (e.g. Skeleton stays and adds one) 
     ## Card staying on battlefield for rest of game
     ## Get 1 coin for losing
+    ## Ability Ideas: Coin - costs 1, 0 value, gives 3 gold if it loses - then get's trashed
+                      Sacrifice - costs 2, value 2 - trash card and trash an opponents cards up to its value (including those on side (like skeletons))
 
     'Draw' powers - probably only useful when there's more than one type of card with that value.
     # Should powers activate before or after damage done?
@@ -21,7 +23,7 @@ Abilities:
 from classes.Card import Card
 
 
-def activate_ability(card, owner, opponent, supply):
+def activate_ability(card, owner, opponent, supply): #obsolete
     if card.rank == "Curse" or card.rank == "King":
         return
     
@@ -77,10 +79,12 @@ def activate_ability_v2(card, owner, opponent, supply):
         heal(owner, 3)
         return (f"{owner.name} healed\n 3 HP.\n\n", "")
     elif card.rank == "Prince":
-        trash_card_from_play(owner, card)    
+        owner.add_to_cards_to_trash(card)
+        #trash_card_from_play(owner, card)    
         return (f"{owner.name}'s {card.rank}\n was trashed.\n\n", "")
     elif card.rank == "Lich":
-        trash_card_from_play(owner, card)
+        #trash_card_from_play(owner, card)
+        owner.add_to_cards_to_trash(card)
         #owner.select_from_supply(supply, card.value + 1) - actions needing choices are now done elsewhere
         return (f"{owner.name} trashed\n their {card.rank} and\n selected a new card\n from supply.\n\n", "lich")
     elif card.rank == "Slime":
@@ -94,7 +98,11 @@ def activate_ability_v2(card, owner, opponent, supply):
         return (f"{owner.name}'s {card.rank}\n will remain\n on the battlefield.\n\n", "")
     elif card.rank == "Matyr":
         owner.set_multiplier(2)
-        return (f"{owner.name}'s damage\n will be doubled\n this round.\n\n")
+        return (f"{owner.name}'s damage\n will be doubled\n this round.\n\n", "")
+    elif card.rank == "Coin":
+        owner.change_money(3)
+        owner.add_to_cards_to_trash(card)
+        return(f"{owner.name}'s Coin\n was exchanged\n for 3 Gold!\n\n", "")
 
 
 def heal(player, heal = 3):

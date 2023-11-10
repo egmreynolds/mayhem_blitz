@@ -150,7 +150,7 @@ def select_from_supply(game, player_idx, max_money):
                 pos = pygame.mouse.get_pos()
                 for obj in clickable_items:
                     if obj.click(pos):
-                        if obj.card.value <= max_money:
+                        if obj.card.cost <= max_money:
                             selected_card = obj.card.rank
                             break_loop = True
                             break

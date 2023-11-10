@@ -69,7 +69,7 @@ class Game:
                 self.players[p].set_prompt("")
             else:
                 bought_card = Card(data[2])
-                self.players[p].change_money(-1 * bought_card.value)
+                self.players[p].change_money(-1 * bought_card.cost)
                 self.players[p].discard.add_cards(bought_card)
                 self.supply.remove_card(bought_card)
                 self.players[p].set_log_text(f"{self.players[p].name} gained\n  a {bought_card.rank}\n from the supply.\n")
@@ -351,6 +351,9 @@ class Game:
 
         self.players[0].add_new_additional_cards()
         self.players[1].add_new_additional_cards()
+        
+        self.players[0].trash_cards_to_trash()
+        self.players[1].trash_cards_to_trash()
 
 
     def check_players_health(self):
