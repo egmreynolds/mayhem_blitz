@@ -39,7 +39,7 @@ async def play(websocket, game, player, connected):
                     return      
             elif data[1] == "ready":
                 print("Game is ready...")
-                if data[1] == "ready" and f"{game.phase}{game.part}" in ["11", "21", "22", "23", "31"] and not(game.players_ready[data[0]]):
+                if data[1] == "ready" and f"{game.phase}{game.part}" in ["11", "21", "22", "23", "31", "32"] and not(game.players_ready[data[0]]):
                     print("step1")
                     game.update_game(data[0], data)
                 game.set_ready(data[0]) # set that player as ready

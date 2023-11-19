@@ -72,6 +72,10 @@ def redrawWindow(win, game, player_idx, phase, reset = False, with_skip = False)
     elif phase == "31":
         redraw_supply(win, game, player_idx)
         redraw_textboxes(win, game, player_idx)
+        
+    elif phase == "32":
+        redraw_supply(win, game, player_idx)
+        redraw_textboxes(win, game, player_idx)
     
     elif phase == "41": # reset to main game and ready for next round.
         redraw_battlefield(win, game, player_idx)
@@ -295,11 +299,13 @@ def redraw_mainmenu(win):
     win.blit(text_connect, (300, 300))
     pygame.display.update()
     
-def redraw_loginscreen(win):
+def redraw_loginscreen(win, register = False):
     """
     Draw Username and Password boxes, display them and request input.
+    If Register is True: also request email and change 'login' button to 'register'
     """      
     username, password = ["", ""]
+    email = ""
     win.fill((21, 139, 154))
     font = pygame.font.SysFont("arial", 60)
     font_subtext = pygame.font.SysFont("arial", 30)
@@ -307,16 +313,24 @@ def redraw_loginscreen(win):
     win.blit(text_title, (250, 100))
     text_username = font_subtext.render("Username", 1, (255, 255, 255))
     text_password = font_subtext.render("Password", 1, (255, 255, 255))
+    
     username_item = InputBox(250, 250, 300, 50, username)
     password_item = InputBox(250, 350, 300, 50, password)
+    
     input_boxes = [username_item, password_item]
+    if register:        
+        email_item = InputBox(250, 450, 300, 50, email)
+        input_boxes.append(email_item)
+        
     win.blit(text_username, (250,220))
-    #username_item.draw(win)
     win.blit(text_password, (250,320))
-    enter_item = UpdatedDisplayItem("Enter", 350, 450, 100, 60, (154, 69, 21))
+    if register:
+        text_email = font_subtext.render("Email", 1, (255, 255, 255))
+        win.blit(text_email, (250,420))
+        
+    enter_item = UpdatedDisplayItem("Enter", 350, 550, 100, 60, (154, 69, 21))
     enter_item.draw(win)
     # Create ENTER ClickableItem: display.
-    #password_item.draw(win)
     pygame.display.update()
     done = False
     while not done:
@@ -330,18 +344,25 @@ def redraw_loginscreen(win):
             # if event hits ENTER: return username, password
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()        
-                if 350 <= pos[0] <= 350 + 100 and 450 <= pos[1] <= 450 + 60:
+                if 350 <= pos[0] <= 350 + 100 and 550 <= pos[1] <= 550 + 60:
                     done = True
                     username = input_boxes[0].text
                     password = input_boxes[1].text
+                    if register:
+                        email = input_boxes[2].text
                     break
 
         for box in input_boxes:
             box.draw(win)
                                     
         pygame.display.update()    
-         
-    return (username, password)   
+    
+    output = (username, password)
+    if register:
+        output = (username, password, email)     
+        
+    return output  
+
 
 def redraw_lobbyscreen(win, wait = False):
     """
@@ -360,4 +381,26 @@ def redraw_lobbyscreen(win, wait = False):
         item = UpdatedDisplayItem("Start Game", 250, 250, 300, 200, (154, 69, 21))
         item.draw(win)
 
+    pygame.display.update()
+    
+    
+def redraw_mainmenu_fastapi(win):
+    """
+    Draw main menu screen in FastAPI client version - First Window User sees in Client.
+    Simply Game Title and Login/Register Buttons.
+    """
+    win.fill((21, 139, 154))
+    font = pygame.font.SysFont("arial", 60)
+    text_title = font.render("Mayhem Blitz", 1, (154, 36, 21))    
+    win.blit(text_title, (250, 100))
+    login_item = UpdatedDisplayItem("", 250, 250, 300, 200, (154, 69, 21))
+    login_item.draw(win)
+    text_login = font.render("Login!", 1, (154, 36, 21)) 
+    win.blit(text_login, (300, 300))
+    
+    register_item = UpdatedDisplayItem("", 250, 500, 300, 200, (154, 69, 21))
+    register_item.draw(win)
+    text_register = font.render("Register!", 1, (154, 36, 21)) 
+    win.blit(text_register, (300, 550))
+        
     pygame.display.update()

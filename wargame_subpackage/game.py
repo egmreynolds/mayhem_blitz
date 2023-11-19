@@ -30,7 +30,12 @@ class Game:
         self.prompt = ["", ""]
         self.game_state = "in_play" #Game states: in_play, game_over; add more as is necessary
         self.game_reset = [False, False]
+        self.supply_coin = 0
         #self.current_phase = "blank"
+                
+    def set_player_names(self, player1, player2):
+        self.players[0].name = player1
+        self.players[1].name = player2
 
     def set_reset(self, p):
         """
@@ -57,24 +62,38 @@ class Game:
             self.players[p].set_log_text("\n".join([f"{card.rank}_{card.value}" for card in self.players[p].cards_played]))
             self.players[p].set_prompt("")
 
-        if self.phase == 2 and self.reaction_activated[p]: # If the player is the one who had a reaction activated, process it.
+        elif self.phase == 2 and self.reaction_activated[p]: # If the player is the one who had a reaction activated, process it.
             self.process_reaction(p, data)
             self.players[0].set_prompt("")
             self.players[1].set_prompt("")
             # process reaction...
 
         elif self.phase == 3 and self.part == 1:
-            if data[2] == "SKIP":
-                self.players[p].set_log_text("No card was chosen\n from supply\n")
-                self.players[p].set_prompt("")
-            else:
-                bought_card = Card(data[2])
-                self.players[p].change_money(-1 * bought_card.cost)
-                self.players[p].discard.add_cards(bought_card)
-                self.supply.remove_card(bought_card)
-                self.players[p].set_log_text(f"{self.players[p].name} gained\n  a {bought_card.rank}\n from the supply.\n")
-                self.players[p].set_prompt("")
-
+            if p == self.supply_coin:
+                if data[2] == "SKIP":
+                    self.players[p].set_log_text("No card was chosen\n from supply\n")
+                    self.players[p].set_prompt("")
+                else:
+                    bought_card = Card(data[2])
+                    self.players[p].change_money(-1 * bought_card.cost)
+                    self.players[p].discard.add_cards(bought_card)
+                    self.supply.remove_card(bought_card)
+                    self.players[p].set_log_text(f"{self.players[p].name} gained\n  a {bought_card.rank}\n from the supply.\n")
+                    self.players[p].set_prompt("")                
+                
+        elif self.phase == 3 and self.part == 2:
+            if p != self.supply_coin:
+                if data[2] == "SKIP":
+                    self.players[p].set_log_text("No card was chosen\n from supply\n")
+                    self.players[p].set_prompt("")
+                else:
+                    bought_card = Card(data[2])
+                    self.players[p].change_money(-1 * bought_card.cost)
+                    self.players[p].discard.add_cards(bought_card)
+                    self.supply.remove_card(bought_card)
+                    self.players[p].set_log_text(f"{self.players[p].name} gained\n  a {bought_card.rank}\n from the supply.\n")
+                    self.players[p].set_prompt("")                          
+            
         print(f"Game updated for player: {p}")
 
 
@@ -120,22 +139,13 @@ class Game:
                 elif self.phase == 3:
                     
                     if self.part == 1:
-                        self.players[0].set_prompt(f"You have {self.players[0].money} coins.\n Select a card to Buy up to that value.\n")
-                        self.players[1].set_prompt(f"You have {self.players[1].money} coins.\n Select a card to Buy up to that value.\n")
-                    # happens on client : money_spent = select_from_supply(game, player_idx, game.players[player_idx].money)
-                    """
-                    elif self.part == 2:                    
-                        if data[1] == "SKIP":
-                            self.players[p].set_log_text("No card was chosen\n from supply\n")
-                            self.players[p].set_prompt("")
-                        else:
-                            bought_card = Card(data[1])
-                            self.players[p].change_money(-1 * bought_card.value)
-                            self.players[p].discard.add_cards(bought_card)
-                            self.supply.remove_card(bought_card)
-                            self.players[p].set_log_text(f"{self.players[p].name} gained a {bought_card.rank}\n from the supply.\n")
-                            self.players[p].set_prompt("")
-                    """
+                        self.players[self.supply_coin].set_prompt(f"You have {self.players[self.supply_coin].money} coins.\n Select a card to Buy up to that value.\n")
+                        self.players[(self.supply_coin - 1)*-1].set_prompt(f"You have {self.players[(self.supply_coin - 1)*-1].money} coins.\n Please wait for your opponent to make their selection.\n")
+                        
+                    elif self.part == 2:
+                        self.players[(self.supply_coin - 1) *-1].set_prompt(f"You have {self.players[(self.supply_coin - 1)*-1].money} coins.\n Select a card to Buy up to that value.\n")
+                        self.players[self.supply_coin].set_prompt(f"You have selected your Buy.\nPlease wait for your opponent to make their selection.\n")
+
                 elif self.phase == 4:
                     self.end_round()
                     self.players[0].set_log_text("New Round")
@@ -336,10 +346,12 @@ class Game:
             self.players[1].change_health(p2damage - p1damage)# makes it negative
             text += f"{self.players[1].name} takes \n{p1damage - p2damage} damage.\n\n"
             text += f"{self.players[1].name} has \n{self.players[1].health} HP remaining.\n"
+            self.supply_coin = 0
         elif p1damage < p2damage:
             self.players[0].change_health(p1damage - p2damage) # makes it negative
             text += f"{self.players[0].name} takes \n{p2damage - p1damage} damage.\n\n"
             text += f"{self.players[0].name} has \n{self.players[0].health} HP remaining.\n"
+            self.supply_coin = 1
         else:
             text += f"A draw\n no damage is done.\n"
 
@@ -391,6 +403,8 @@ class Game:
             if self.part == 1:
                 self.part = 2
             elif self.part == 2:
+                self.part = 3
+            elif self.part == 3:
                 self.part = 1
                 self.phase = 4
 

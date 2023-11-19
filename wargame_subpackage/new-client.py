@@ -189,14 +189,25 @@ def update_game_client(game, player_idx):
         elif game.phase == 3 and game.part == 1: ## Big screen update
             print("Phase 31")
             redrawWindow(win, game, player_idx, "31")
-            selected_card = select_from_supply(game, player_idx, game.players[player_idx].money)
-            msg = [player_idx, "ready", selected_card]
-
+            if game.supply_coin == player_idx:                
+                selected_card = select_from_supply(game, player_idx, game.players[player_idx].money)
+                msg = [player_idx, "ready", selected_card]
+            else:
+                msg = [player_idx, "ready"]
+            
         elif game.phase == 3 and game.part == 2:
             print("Phase 32")
-            redrawWindow(win, game, player_idx, "31")
+            redrawWindow(win, game, player_idx, "32")
+            if game.supply_coin != player_idx:
+                selected_card = select_from_supply(game, player_idx, game.players[player_idx].money)
+                msg = [player_idx, "ready", selected_card]
+            else:
+                msg = [player_idx, "ready"]
+
+        elif game.phase == 3 and game.part == 3:
+            print("Phase 33")
+            redrawWindow(win, game, player_idx, "32")
             pygame.time.delay(1000)
-            #selected_card = select_from_supply(game, player_idx, game.players[player_idx].money)
             msg = [player_idx, "ready"]#, selected_card]
             redrawWindow(win, game, player_idx, "41", reset = True)
             pygame.time.delay(1000)
