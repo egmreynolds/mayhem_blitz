@@ -75,7 +75,12 @@ def redraw_guard_reaction(win, game, player_idx):
     redrawWindow(win, game, player_idx, "11", with_skip = True)
 
 def request_guard_reaction(game, player_idx):
-    clickables = make_card_display(game.players[player_idx].hand.all_cards, "hand", "clickable")
+    clicklables = []
+    try: # Quick Fix to handle GameOut of fastapi version
+        clickables = make_card_display([Card(name) for name in game.hand], "hand", "clickable")
+    except: # game.hand should through an exception in old-version so should run this instead:
+        clickables = make_card_display(game.players[player_idx].hand.all_cards, "hand", "clickable")
+                
     clickables.append(ClickableDisplayItem("SKIP", hand_cards_x + (card_width + sep) * len(clickables), hand_cards_y, card_width, card_height, (255, 255, 255), Card("SKIP")))
     selected_card = ""
     break_loop = False
