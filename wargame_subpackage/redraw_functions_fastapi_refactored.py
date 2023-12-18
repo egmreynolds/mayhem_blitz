@@ -70,7 +70,7 @@ def redrawWindow(win, game, player_idx, reset = False, with_skip = False):
     elif phase in ["21", "22", "23", "24"]:
         redraw_battlefield(win, game, player_idx)
         redraw_stats(win, game, player_idx)
-        redraw_hand(win, game, player_idx)
+        redraw_hand(win, game, player_idx, with_skip = with_skip)
         redraw_textboxes(win, game, player_idx)        
 
     elif phase == "31":
